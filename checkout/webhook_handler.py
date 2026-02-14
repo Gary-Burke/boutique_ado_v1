@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 from .models import Order, OrderLineItem
+from django.contrib.auth.models import User
 from products.models import Product
 from profiles.models import UserProfile
 
@@ -66,10 +67,17 @@ class StripeWH_Handler:
 
         # Update profile information if save_info was checked
         profile = None
-        username = intent.metadata.username
-        if username != 'AnonymousUser':
-            profile = UserProfile.objects.get(user__username=username)
-            if save_info:
+        username = intent.metadata.get('username')
+
+        if username and username != 'AnonymousUser':
+            try:
+                profile, created = UserProfile.objects.get_or_create(
+                    user=User.objects.get(username=username)
+                )
+            except User.DoesNotExist:
+                profile = None
+
+            if profile and save_info:
                 profile.default_phone_number = shipping_details.phone
                 profile.default_country = shipping_details.address.country
                 profile.default_postcode = shipping_details.address.postal_code
