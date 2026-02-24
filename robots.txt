@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /accounts/ 
+Disallow: /bag/
+Sitemap: https://boutique-ci-project-6e21080758a8.herokuapp.com/sitemap.xml
